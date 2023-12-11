@@ -2,13 +2,17 @@ package ru.yandex.practicum.filmorate.validator;
 
 
 import javax.validation.Constraint;
-import javax.validation.constraints.Past;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Retention(RetentionPolicy.RUNTIME)
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+@Target({FIELD})
+@Retention(RUNTIME)
 @Constraint(validatedBy = ReleaseDateValidator.class)
-@Past
+@Documented
 public @interface ValidReleaseDate {
     String message() default "Дата релиза фильма не может быть раньше {value}";
     Class<?>[] groups() default {};

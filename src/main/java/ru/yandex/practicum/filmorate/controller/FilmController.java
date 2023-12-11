@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
@@ -37,11 +39,13 @@ public class FilmController {
             films.put(film.getId(), film);
             log.info("Фильм обновлен");
             return film;
+        } else {
+            log.info("Не удалось обновить фильм " + film);
+            throw new ValidationException("Такого фильма нет", HttpStatus.NOT_FOUND);
         }
-        throw new ValidationException("Такого фильма нет", HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping
+    @GetMapping(produces = "application/json")
     public List<Film> findAllFilms() {
         log.info("Выведены все фильмы");
         return new ArrayList<>(films.values());

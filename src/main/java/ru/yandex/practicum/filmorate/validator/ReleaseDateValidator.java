@@ -5,15 +5,18 @@ import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
 public class ReleaseDateValidator implements ConstraintValidator<ValidReleaseDate, LocalDate> {
-    private LocalDate minimumDate;
+    private String annotationDateAfter;
 
     @Override
-    public void initialize(ValidReleaseDate constraintAnnotation) {
-        minimumDate = LocalDate.parse(constraintAnnotation.value());
+    public void initialize(ValidReleaseDate date) {
+        this.annotationDateAfter = date.value();
     }
 
     @Override
-    public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
-        return value == null || !value.isBefore(minimumDate);
+    public boolean isValid(LocalDate target, ConstraintValidatorContext context) {
+        if (target != null) {
+            return target.isAfter(LocalDate.parse(annotationDateAfter).minusDays(1));
+        }
+        return false;
     }
 }
