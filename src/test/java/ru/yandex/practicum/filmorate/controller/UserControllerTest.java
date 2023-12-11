@@ -28,7 +28,7 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
 
-    private static Stream<Arguments> Users() {
+    private static Stream<Arguments> users() {
         return Stream.of(Arguments.of(new User(0, "email.ru", "login", "name", LocalDate.of(1, 2, 3)), HttpStatus.BAD_REQUEST.value()),
                 Arguments.of(new User(1, "e@mail.ru", "log in", "name", LocalDate.of(1, 2, 3)), HttpStatus.BAD_REQUEST.value()),
                 Arguments.of(new User(2, "e@mail.ru", "login", " ", LocalDate.of(1, 2, 3)), HttpStatus.OK.value()),
@@ -39,8 +39,8 @@ class UserControllerTest {
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("Users")
-    void UserValidation(User user, int status) {
+    @MethodSource("users")
+    void userValidation(User user, int status) {
         mockMvc.perform(
                 post("/users")
                         .content(objectMapper.writeValueAsString(user))

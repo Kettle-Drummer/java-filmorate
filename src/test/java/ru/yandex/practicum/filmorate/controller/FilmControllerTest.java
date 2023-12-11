@@ -25,7 +25,7 @@ class FilmControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private static Stream<Arguments> Films() {
+    private static Stream<Arguments> films() {
         return Stream.of(
                 Arguments.of(new Film(0,"", "desc", LocalDate.of(2023, 12, 31), 1), HttpStatus.BAD_REQUEST.value()),
                 Arguments.of(new Film(1, "name", "straight up 201 of 1 111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111", LocalDate.parse("2020-10-05"), 30), HttpStatus.BAD_REQUEST.value()),
@@ -38,8 +38,8 @@ class FilmControllerTest {
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("Films")
-    void FilmValidation(Film film, int status) {
+    @MethodSource("films")
+    void filmValidation(Film film, int status) {
         mockMvc.perform(
                 post("/films")
                         .content(objectMapper.writeValueAsString(film))
