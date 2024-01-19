@@ -41,6 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
     private long id;
+
     private long createId() {
         return ++id;
     }
