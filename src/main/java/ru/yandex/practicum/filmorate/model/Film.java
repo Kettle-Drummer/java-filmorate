@@ -10,13 +10,15 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Film {
     @EqualsAndHashCode.Exclude
-    private int id;
+    private Long id;
     @NotBlank(message = "название не может быть пустым")
     private String name;
     @Size(max = 200, message = "максимальная длина описания — 200 символов")
@@ -25,4 +27,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "продолжительность фильма должна быть положительной")
     private int duration;
+    private Set<Long> likeId = new HashSet<>();
 }

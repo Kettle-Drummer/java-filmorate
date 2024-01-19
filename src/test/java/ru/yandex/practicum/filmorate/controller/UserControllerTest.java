@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,10 +30,10 @@ class UserControllerTest {
 
 
     private static Stream<Arguments> users() {
-        return Stream.of(Arguments.of(new User(0, "email.ru", "login", "name", LocalDate.of(1, 2, 3)), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new User(1, "e@mail.ru", "log in", "name", LocalDate.of(1, 2, 3)), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new User(2, "e@mail.ru", "login", " ", LocalDate.of(1, 2, 3)), HttpStatus.OK.value()),
-                Arguments.of(new User(3, "e@mail.ru", "login", "name", LocalDate.of(2023, 12, 31)), HttpStatus.BAD_REQUEST.value()),
+        return Stream.of(Arguments.of(new User(0L, "email.ru", "login", "name", LocalDate.of(1, 2, 3), new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
+                Arguments.of(new User(1L, "e@mail.ru", "log in", "name", LocalDate.of(1, 2, 3), new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
+                Arguments.of(new User(2L, "e@mail.ru", "login", " ", LocalDate.of(1, 2, 3), new HashSet<>()), HttpStatus.OK.value()),
+                Arguments.of(new User(3L, "e@mail.ru", "login", "name", LocalDate.of(2024, 12, 31), new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
                 Arguments.of(new User(), HttpStatus.BAD_REQUEST.value())
         );
     }
