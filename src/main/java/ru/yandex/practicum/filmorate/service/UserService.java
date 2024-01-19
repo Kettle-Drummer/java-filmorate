@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     public User create(User user) {
-        FillEmptyName(user);
+        fillEmptyName(user);
         return userStorage.create(user);
     }
 
     public User update(User user) {
-        FillEmptyName(user);
+        fillEmptyName(user);
         return userStorage.update(user);
     }
 
@@ -85,7 +85,7 @@ public class UserService {
         }
     }
 
-    private void FillEmptyName(User user) {
+    private void fillEmptyName(User user) {
         if (Objects.isNull(user.getName()) || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
