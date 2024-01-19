@@ -16,6 +16,7 @@ public class ErrorHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorMessage(e.getMessage()));
     }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorMessage> handleNotFoundException(final ResourceNotFoundException e) {
         log.info(e.getMessage());
