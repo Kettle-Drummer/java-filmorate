@@ -10,13 +10,6 @@ import java.util.*;
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Long, User> users = new HashMap<>();
-    private long id;
-
-    private long createId() {
-        return ++id;
-    }
-
     public User create(User user) {
         user.setId(createId());
         users.put(user.getId(), user);
@@ -30,8 +23,8 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Пользователь обновлен: {}", user);
             return user;
         } else {
-            log.info("Не удалось обновить пользователя " + user);
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("Юзер не найден. Id= " + user.getId());
+
         }
     }
 
@@ -43,6 +36,13 @@ public class InMemoryUserStorage implements UserStorage {
         if (users.containsKey(id)) {
             return users.get(id);
         } else
-        throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("Юзер не найден. Id= " + id);
         }
+
+    private final Map<Long, User> users = new HashMap<>();
+    private long id;
+    private long createId() {
+        return ++id;
+    }
+
 }

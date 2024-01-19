@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.validator.ValidReleaseDate;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
@@ -21,11 +23,13 @@ public class Film {
     private Long id;
     @NotBlank(message = "название не может быть пустым")
     private String name;
+    @NotNull
     @Size(max = 200, message = "максимальная длина описания — 200 символов")
     private String description;
     @ValidReleaseDate(message = "дата релиза — не раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
     @Positive(message = "продолжительность фильма должна быть положительной")
     private int duration;
+    @JsonIgnore
     private Set<Long> likeId = new HashSet<>();
 }

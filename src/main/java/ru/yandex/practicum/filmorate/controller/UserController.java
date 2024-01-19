@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,32 +12,28 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 @Slf4j
 public class UserController {
     private final UserService service;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.service = userService;
-    }
-
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
+    public User add(@Valid @RequestBody User user) {
         return service.create(user);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
+    public User update(@Valid @RequestBody User user) {
         return service.update(user);
     }
 
     @GetMapping
-    public List<User> findAllUsers() {
+    public List<User> findAll() {
         return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public User findUserById(@PathVariable("id") Long id) {
+    public User findById(@PathVariable("id") Long id) {
         return service.findUserById(id);
     }
 
@@ -53,7 +50,7 @@ public class UserController {
     }
 
     @GetMapping("{id}/friends")
-    public List<User> findFriends(@PathVariable("id") Long userId) {
+    public List<User> findAllFriends(@PathVariable("id") Long userId) {
         return service.findFriends(userId);
     }
 

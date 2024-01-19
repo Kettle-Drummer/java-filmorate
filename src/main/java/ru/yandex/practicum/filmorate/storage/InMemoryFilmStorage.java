@@ -10,14 +10,6 @@ import java.util.*;
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-
-    private final Map<Long, Film> films = new HashMap<>();
-    private long id;
-
-    private long createId() {
-        return ++id;
-    }
-
     public Film create(Film film) {
         film.setId(createId());
         films.put(film.getId(), film);
@@ -31,8 +23,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Фильм обновлен");
             return film;
         } else {
-            log.info("Не удалось обновить фильм " + film);
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("Фильм не найден. Id= " + film.getId());
         }
     }
 
@@ -44,6 +35,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.containsKey(id)) {
             return films.get(id);
         } else
-            throw new ResourceNotFoundException();
+            throw new ResourceNotFoundException("Фильм не найден. Id= " + id);
+    }
+
+    private final Map<Long, Film> films = new HashMap<>();
+    private long id;
+    private long createId() {
+        return ++id;
     }
 }
