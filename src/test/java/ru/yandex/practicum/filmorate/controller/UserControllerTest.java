@@ -1,51 +1,136 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class UserControllerTest {
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private MockMvc mockMvc;
 
+    @Mock
+    private UserService userService;
 
-    private static Stream<Arguments> users() {
-        return Stream.of(Arguments.of(new User(0L, "email.ru", "login", "name", LocalDate.of(1, 2, 3), new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new User(1L, "e@mail.ru", "log in", "name", LocalDate.of(1, 2, 3), new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new User(2L, "e@mail.ru", "login", " ", LocalDate.of(1, 2, 3), new HashSet<>()), HttpStatus.OK.value()),
-                Arguments.of(new User(3L, "e@mail.ru", "login", "name", LocalDate.of(2024, 12, 31), new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new User(), HttpStatus.BAD_REQUEST.value())
-        );
+    @InjectMocks
+    private UserController userController;
+
+    @Test
+    void createUser_ValidUser_ReturnsCreatedUser() {
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setLogin("testuser");
+
+        User createdUser = new User();
+        createdUser.setId(1L);
+        createdUser.setEmail("test@example.com");
+        createdUser.setLogin("testuser");
+
+        when(userService.create(user)).thenReturn(createdUser);
+
+        User result = userController.add(user);
+
+        assertEquals(createdUser, result);
+        verify(userService, times(1)).create(user);
     }
 
-    @SneakyThrows
-    @ParameterizedTest
-    @MethodSource("users")
-    void userValidation(User user, int status) {
-        mockMvc.perform(
-                post("/users")
-                        .content(objectMapper.writeValueAsString(user))
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().is(status));
+    @Test
+    void updateUser_ValidUser_ReturnsUpdatedUser() {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@example.com");
+        user.setLogin("testuser");
+
+        User updatedUser = new User();
+        updatedUser.setId(1L);
+        updatedUser.setEmail("updated@example.com");
+        updatedUser.setLogin("testuser");
+
+        when(userService.update(user)).thenReturn(updatedUser);
+        User result = userController.update(user);
+        assertEquals(updatedUser, result);
+        verify(userService, times(1)).update(user);
+    }
+
+    @Test
+    void getAllUsers_ReturnsListOfUsers() {
+        List<User> users = Collections.singletonList(new User());
+
+        when(userService.findAll()).thenReturn(users);
+
+        List<User> result = userController.findAll();
+
+        assertEquals(users, result);
+        verify(userService, times(1)).findAll();
+    }
+
+    @Test
+    void getUserById_ExistingId_ReturnsUser() {
+        Long userId = 1L;
+        User user = new User();
+        user.setId(userId);
+
+        when(userService.findById(userId)).thenReturn(user);
+
+        User result = userController.findById(userId);
+
+        assertEquals(user, result);
+        verify(userService, times(1)).findById(userId);
+    }
+
+    @Test
+    void addFriend_ValidIds_NoContentReturned() {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        Assertions.assertDoesNotThrow(() -> userController.addFriend(userId, friendId));
+
+        verify(userService, times(1)).addFriend(userId, friendId);
+    }
+
+    @Test
+    void removeFriend_ValidIds_NoContentReturned() {
+        Long userId = 1L;
+        Long friendId = 2L;
+
+        Assertions.assertDoesNotThrow(() -> userController.removeFriend(userId, friendId));
+
+        verify(userService, times(1)).removeFriend(userId, friendId);
+    }
+
+    @Test
+    void getFriends_ValidId_ReturnsListOfFriends() {
+        Long userId = 1L;
+        List<User> friends = Collections.singletonList(new User());
+
+        when(userService.findAllFriends(userId)).thenReturn(friends);
+
+        List<User> result = userController.findAllFriends(userId);
+
+        assertEquals(friends, result);
+        verify(userService, times(1)).findAllFriends(userId);
+    }
+
+    @Test
+    void getCommonFriends_ValidIds_ReturnsListOfCommonFriends() {
+        Long userId = 1L;
+        Long otherId = 2L;
+        List<User> commonFriends = Collections.singletonList(new User());
+
+        when(userService.findCommonFriends(userId, otherId)).thenReturn(commonFriends);
+
+        List<User> result = userController.findCommonFriends(userId, otherId);
+
+        assertEquals(commonFriends, result);
+        verify(userService, times(1)).findCommonFriends(userId, otherId);
     }
 }

@@ -1,23 +1,24 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.lang.Nullable;
+
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.constraints.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
-import org.springframework.lang.Nullable;
-
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @EqualsAndHashCode.Exclude
     private Long id;
-    @NotNull
-    @NotEmpty
+    @NotBlank
     @Email(message = "электронная почта не может быть пустой и должна содержать символ @")
     private String email;
     @NotBlank
@@ -28,6 +29,5 @@ public class User {
     @NotNull
     @PastOrPresent(message = "дата рождения не может быть в будущем")
     private  LocalDate birthday;
-    @JsonIgnore
-    private Set<Long> friendsId = new HashSet<>();
+    private Set<Long> friends = new HashSet<>();
 }

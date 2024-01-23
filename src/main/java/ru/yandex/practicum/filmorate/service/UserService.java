@@ -14,12 +14,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
+
+    private final UserStorage userStorage;
+
     public User create(User user) {
         fillEmptyName(user);
         return userStorage.create(user);
     }
 
     public User update(User user) {
+        if (userStorage.findById(user.getId()) == null) {
+            throw new ResourceNotFoundException("Ошибка! Невозможно обновить пользователя - его не существует.");
+        }
         fillEmptyName(user);
         return userStorage.update(user);
     }
@@ -28,61 +34,53 @@ public class UserService {
         return userStorage.findAll();
     }
 
-    public User findUserById(Long id) {
-        return userStorage.findUserById(id);
+    public User findById(Long id) {
+        User user = userStorage.findById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException("Пользователь не найден");
+        }
+        return userStorage.findById(id);
     }
-
     public User addFriend(Long id, Long friendId) {
-        User user = userStorage.findUserById(id);
-        User friend = userStorage.findUserById(friendId);
-
-            if (!id.equals(friendId)) {
-                user.getFriendsId().add(friendId);
-                friend.getFriendsId().add(id);
-                log.info("Пользователи {} и {} теперь друзья", user.getName(), friend.getName());
-                return friend;
-            } else {
-               throw new ResourceNotFoundException("Нет такой пары пользователей");
-            }
-
+        if (userStorage.findById(id) == null || userStorage.findById(friendId) == null) {
+            throw new ResourceNotFoundException("Не найден пользователь");
+        }
+        userStorage.addFriend(id, friendId);
+        return userStorage.findById(id);
     }
 
     public User removeFriend(Long id, Long friendId) {
-        User user = userStorage.findUserById(id);
-        User friend = userStorage.findUserById(friendId);
-
-        if (!id.equals(friendId)) {
-            user.getFriendsId().remove(friendId);
-            friend.getFriendsId().remove(id);
-            log.info("Пользователи {} и {} больше не друзья", user.getName(), friend.getName());
-            return friend;
-        } else {
-            throw new ResourceNotFoundException("Нет такой пары пользователей");
+        if (userStorage.findById(id) == null || userStorage.findById(friendId) == null) {
+            throw new ResourceNotFoundException("Не найден пользователь");
         }
+        userStorage.removeFriend(id, friendId);
+        return userStorage.findById(id);
     }
 
-    public List<User> findFriends(Long userId) {
-            return userStorage.findAll().stream()
-                    .filter(user -> user.getFriendsId().contains(userId))
-                    .collect(Collectors.toList());
-
+    public List<User> findAllFriends(Long id) {
+        if (userStorage.findById(id) == null) {
+            throw new ResourceNotFoundException("Не найден пользователь");
+        }
+        return userStorage.findAllFriends(id);
     }
 
-    public List<User> findCommonFriends(Long id, Long otherUserId) {
-        User user = userStorage.findUserById(id);
-        User friend = userStorage.findUserById(otherUserId);
+    public List<User> findCommonFriends(Long id, Long friendId) {
 
-        if (!id.equals(otherUserId)) {
-            Set<Long> commonFriends = new HashSet<>(user.getFriendsId());
-            commonFriends.retainAll(friend.getFriendsId());
-            List<User> result = new ArrayList<>();
-            for (Long friendId : commonFriends) {
-                result.add(userStorage.findUserById(friendId));
-            }
-            return result;
-        } else {
-            throw new ResourceNotFoundException("Нет такой пары пользователей");
+
+        if (userStorage.findById(id) == null || userStorage.findById(friendId) == null) {
+            throw new ResourceNotFoundException("Не найден пользователь");
         }
+
+        Set<User> friends = new HashSet<>(userStorage.findAllFriends(id));
+        Set<User> otherFriends = new HashSet<>(userStorage.findAllFriends(friendId));
+
+        if (friends.isEmpty() || otherFriends.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return friends.stream()
+                .filter(otherFriends::contains)
+                .collect(Collectors.toList());
     }
 
     private void fillEmptyName(User user) {
@@ -90,6 +88,4 @@ public class UserService {
             user.setName(user.getLogin());
         }
     }
-
-    private final UserStorage userStorage;
 }

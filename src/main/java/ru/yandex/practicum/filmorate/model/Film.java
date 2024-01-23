@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.lang.Nullable;
 import ru.yandex.practicum.filmorate.validator.ValidReleaseDate;
 
 import javax.validation.constraints.NotBlank;
@@ -15,13 +13,17 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 public class Film {
     @EqualsAndHashCode.Exclude
-    private Long id;
+    private long id;
     @NotBlank(message = "название не может быть пустым")
+    @NotNull
     private String name;
     @NotNull
     @Size(max = 200, message = "максимальная длина описания — 200 символов")
@@ -30,6 +32,8 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "продолжительность фильма должна быть положительной")
     private int duration;
-    @JsonIgnore
-    private Set<Long> likeId = new HashSet<>();
+    private Set<Long> likesUser = new HashSet<>();
+
+    private Mpa mpa;
+    private Set<Genre> genres = new HashSet<>();
 }

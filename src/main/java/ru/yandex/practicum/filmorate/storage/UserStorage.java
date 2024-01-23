@@ -11,5 +11,11 @@ public interface UserStorage {
 
     List<User> findAll();
 
-    User findUserById(Long id);
+    User findById(Long userId);
+
+    void addFriend(Long userId, Long friendId);
+
+    void removeFriend(Long userId, Long friendId);
+
+    List<User> findAllFriends(Long userId);
 }

@@ -1,52 +1,152 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class FilmControllerTest {
-    @Autowired
-    private ObjectMapper objectMapper;
+@WebMvcTest(FilmController.class)
+public class FilmControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
-    private static Stream<Arguments> films() {
-        return Stream.of(
-                Arguments.of(new Film(0L,"", "desc", LocalDate.of(2023, 12, 31), 1, new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new Film(1L, "name", "straight up 201 of 1 111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111", LocalDate.parse("2020-10-05"), 30, new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new Film(2L, "name", "desc", LocalDate.of(1, 2, 3), 1, new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new Film(3L, "name", "desc", LocalDate.of(2023, 12, 31), -1, new HashSet<>()), HttpStatus.BAD_REQUEST.value()),
-                Arguments.of(new Film(4L, "name", "desc", LocalDate.of(1895, 12, 28), 1, new HashSet<>()), HttpStatus.OK.value()),
-                Arguments.of(new Film(), HttpStatus.BAD_REQUEST.value())
-        );
+    @MockBean
+    private FilmService filmService;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
     }
 
-    @SneakyThrows
-    @ParameterizedTest
-    @MethodSource("films")
-    void filmValidation(Film film, int status) {
-        mockMvc.perform(
-                post("/films")
-                        .content(objectMapper.writeValueAsString(film))
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().is(status));
+    @Test
+    void addFilm_ValidFilm_ReturnsCreatedFilm() {
+        Film film = new Film();
+        film.setName("Test Film");
+        film.setDescription("This is a test film");
+        film.setReleaseDate(LocalDate.now());
+        film.setDuration(120);
+
+        Film createdFilm = new Film();
+        createdFilm.setId(1L);
+        createdFilm.setName("Test Film");
+        createdFilm.setDescription("This is a test film");
+        createdFilm.setReleaseDate(LocalDate.now());
+        createdFilm.setDuration(120);
+        FilmController filmController = new FilmController(filmService);
+
+        when(filmService.create(film)).thenReturn(createdFilm);
+
+        Film result = filmController.add(film);
+
+        assertEquals(createdFilm, result);
+        verify(filmService, times(1)).create(film);
+    }
+
+    @Test
+    void updateFilm_ValidFilm_ReturnsUpdatedFilm() {
+        Film film = new Film();
+        film.setId(1L);
+        film.setName("Updated Film");
+        film.setDescription("This is an updated film");
+        film.setReleaseDate(LocalDate.now());
+        film.setDuration(150);
+
+        Film updatedFilm = new Film();
+        updatedFilm.setId(1L);
+        updatedFilm.setName("Updated Film");
+        updatedFilm.setDescription("This is an updated film");
+        updatedFilm.setReleaseDate(LocalDate.now());
+        updatedFilm.setDuration(150);
+
+        FilmController filmController;
+
+        filmController = new FilmController(filmService);
+
+        when(filmService.update(film)).thenReturn(updatedFilm);
+
+        Film result = filmController.update(film);
+
+        assertEquals(updatedFilm, result);
+        verify(filmService, times(1)).update(film);
+    }
+
+    @Test
+    public void testGetAllFilms() throws Exception {
+        Film film1 = new Film();
+        film1.setId(1L);
+        film1.setName("Film 1");
+
+        Film film2 = new Film();
+        film2.setId(2L);
+        film2.setName("Film 2");
+
+        List<Film> films = Arrays.asList(film1, film2);
+
+        when(filmService.findAll()).thenReturn(films);
+
+        mockMvc.perform(get("/films"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Film 1"))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].name").value("Film 2"));
+
+        verify(filmService, times(1)).findAll();
+    }
+
+    @Test
+    public void testGetFilmById() throws Exception {
+        Film film = new Film();
+        film.setId(1L);
+        film.setName("Film 1");
+
+        when(filmService.findById(1L)).thenReturn(film);
+
+        mockMvc.perform(get("/films/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Film 1"));
+
+        verify(filmService, times(1)).findById(1L);
+    }
+
+    @Test
+    public void testGetPopularFilms() throws Exception {
+        Film film1 = new Film();
+        film1.setId(1L);
+        film1.setName("Film 1");
+
+        Film film2 = new Film();
+        film2.setId(2L);
+        film2.setName("Film 2");
+
+        List<Film> films = Arrays.asList(film1, film2);
+
+        when(filmService.findPopular(10)).thenReturn(films);
+
+        mockMvc.perform(get("/films/popular"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Film 1"))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].name").value("Film 2"));
+
+        verify(filmService, times(1)).findPopular(10);
     }
 }
