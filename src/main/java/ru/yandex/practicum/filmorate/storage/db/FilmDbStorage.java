@@ -129,7 +129,6 @@ public class FilmDbStorage implements FilmStorage {
         return result;
     }
 
-
     @Override
     public void addLike(Long filmId, Long userId) {
         try {
@@ -145,7 +144,6 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?;";
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
-
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
         log.info("Film build start>>>>>");

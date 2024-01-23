@@ -41,6 +41,7 @@ public class UserService {
         }
         return userStorage.findById(id);
     }
+
     public User addFriend(Long id, Long friendId) {
         if (userStorage.findById(id) == null || userStorage.findById(friendId) == null) {
             throw new ResourceNotFoundException("Не найден пользователь");
