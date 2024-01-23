@@ -25,11 +25,4 @@ public class ErrorHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorMessage(e.getMessage()));
     }
-    @ExceptionHandler
-    public ResponseEntity<ErrorMessage> handleException(Exception e) {
-        log.info(e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorMessage(e.getMessage()));
-    }
 }
