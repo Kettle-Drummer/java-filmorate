@@ -22,4 +22,6 @@ public interface FilmStorage {
     List<Long> getLikesOfFilm(Long filmId);
 
     Map<Long, Set<Long>> getLikesOfFilm(List<Film> filmIds);
+
+    List<Film> findPopular(Integer count);
 }

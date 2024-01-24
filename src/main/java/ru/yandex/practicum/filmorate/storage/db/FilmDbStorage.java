@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.db;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -143,6 +144,25 @@ public class FilmDbStorage implements FilmStorage {
     public void deleteLike(Long filmId, Long userId) {
         String sqlQuery = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?;";
         jdbcTemplate.update(sqlQuery, filmId, userId);
+    }
+
+    @Override
+    public List<Film> findPopular(Integer count) {
+        String sql = "SELECT f.ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATING_ID, " +
+                "r.ID AS MPA_ID, r.name AS MPA_NAME, STRING_AGG(DISTINCT g.id || '-' || g.name, ',') AS genres, " +
+                "STRING_AGG(DISTINCT l.user_id, ',') AS likes, " +
+                "LENGTH (STRING_AGG(distinct l.user_id,'' )) AS likes_count " +
+                "FROM FILMS f " +
+                "LEFT JOIN RATING r ON f.RATING_ID = r.ID " +
+                "LEFT JOIN film_genre fg ON f.id = fg.film_id " +
+                "LEFT JOIN GENRE g ON fg.GENRE_ID = g.ID " +
+                "LEFT JOIN film_likes l ON f.ID = l.FILM_ID " +
+                "GROUP BY f.ID " +
+                "ORDER BY likes_count DESC " +
+                "LIMIT ?";
+
+        return Optional.of(jdbcTemplate.query(sql, this::mapRowToFilm, count))
+                .orElse(Collections.emptyList());
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {

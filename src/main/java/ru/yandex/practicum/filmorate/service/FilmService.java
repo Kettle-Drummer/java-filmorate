@@ -66,14 +66,6 @@ public class FilmService {
     }
 
     public List<Film> findPopular(Integer count) {
-        List<Film> films = filmStorage.findAll();
-
-        Map<Long, Set<Long>> filmLikesMap = filmStorage.getLikesOfFilm(films);
-
-        return films.stream()
-                .peek(film -> film.setLikesUser(filmLikesMap.get(film.getId())))
-                .sorted((o1, o2) -> o2.getLikesUser().size() - o1.getLikesUser().size())
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.findPopular(count);
     }
 }
