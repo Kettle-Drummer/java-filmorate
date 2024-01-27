@@ -14,48 +14,48 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
-    private final UserService service;
+    private final UserService userService;
 
     @PostMapping
     public User add(@Valid @RequestBody User user) {
-        return service.create(user);
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        return service.update(user);
+        return userService.update(user);
     }
 
     @GetMapping
     public List<User> findAll() {
-        return service.findAll();
+        return userService.findAll();
     }
 
     @GetMapping("/{id}")
     public User findById(@PathVariable("id") Long id) {
-        return service.findUserById(id);
+        return userService.findById(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public User addFriend(@PathVariable("id") Long id,
                           @PathVariable("friendId") Long friendId) {
-        return service.addFriend(id, friendId);
+        return userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public User removeFriend(@PathVariable("id") Long userId,
                              @PathVariable("friendId") Long friendId) {
-        return service.removeFriend(userId, friendId);
+        return userService.removeFriend(userId, friendId);
     }
 
     @GetMapping("{id}/friends")
     public List<User> findAllFriends(@PathVariable("id") Long userId) {
-        return service.findFriends(userId);
+        return userService.findAllFriends(userId);
     }
 
     @GetMapping("{id}/friends/common/{otherId}")
     public List<User> findCommonFriends(@PathVariable("id") Long userId,
                                         @PathVariable("otherId") Long otherUserId) {
-        return service.findCommonFriends(userId, otherUserId);
+        return userService.findCommonFriends(userId, otherUserId);
     }
 }
